@@ -57,19 +57,19 @@ if (list.length) {
 inquirer.prompt([
 {
     type: 'input',
-    message: '请输入你的项目简介:',
+    message: '请输入你的项目简介:\n',
     name: 'projectDesc',
     default: "这是我的一个新项目"
 },
 {
     type: 'input',
-    message: '请输入你的页面title:',
+    message: '请输入你的页面title:\n',
     name: 'pageTitle',
     default: "新项目"
 },
 {
     type: 'list',
-    message: '请选择你目前的UI设计图尺寸:',
+    message: '请选择你目前的UI设计图尺寸:\n',
     name: 'uiPX',
     choices: [
         750,
@@ -79,7 +79,7 @@ inquirer.prompt([
 },
 {
     type: 'list',
-    message: '请选择你所使用的构建工具:',
+    message: '请选择你所使用的构建工具:\n',
     name: 'url',
     choices: [
         'gulp'
@@ -117,7 +117,7 @@ function handleTemplate(answers) {
       })
       .then(res => {
         console.log(logSymbols.success, chalk.green('模板构建成功！\n'))
-        console.log(logSymbols.info, chalk.red('使用指南：\n'))
+        console.log('<使用指南>\n')
         console.log('1、 cd ' + res.dest)
         console.log('进入项目\n')
         console.log('2、 npm i')
@@ -127,8 +127,8 @@ function handleTemplate(answers) {
         console.log('4、 gulp dev')
         console.log('进入开发环境下的编码\n')
         console.log('5、 gulp build')
-        console.log('打包压缩项目资源\n')
-
+        console.log('打包压缩项目资源')
+        return
       })
       .catch(error => {
         console.error(logSymbols.error, chalk.red(`模板构建失败：${error.message}`))
