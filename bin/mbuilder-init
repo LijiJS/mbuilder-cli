@@ -1,0 +1,140 @@
+#!/usr/bin/env node
+
+const path = require('path')
+const fs = require('fs')
+const program = require('commander')
+const inquirer = require('inquirer')
+const chalk = require('chalk')
+const ora = require('ora')
+const logSymbols = require('log-symbols')
+const glob = require('glob')
+const tplObj = require(`${__dirname}/../template`)
+const download = require(`${__dirname}/../lib/download`)
+const generate = require(`${__dirname}/../lib/generate`)
+
+program
+.usage('<project-name>')
+program.parse(process.argv)
+
+const list = glob.sync('*')  // 遍历当前目录
+let rootName = path.basename(process.cwd())
+let next = undefined
+
+//创建项目目录
+let projectName = program.args[0]
+if (!projectName) {
+  program.help()
+  return
+}
+if (list.length) {
+  if (list.filter(name => {
+    const fileName = path.resolve(process.cwd(), path.join('.', name))
+    const isDir = fs.statSync(fileName).isDirectory()
+    return name.indexOf(projectName) !== -1 && isDir
+  }).length !== 0) {
+    console.log(`${projectName} 目录已存在！`)
+    return
+  }
+  next = Promise.resolve(projectName)
+
+} else if (rootName === projectName) {
+  next = inquirer.prompt([
+    {
+      name: 'buildInCurrent',
+      message: '当前目录为空，且目录名称和项目名称相同，是否直接在当前目录下创建新项目？',
+      type: 'confirm',
+      default: true
+    }
+  ]).then(answer => {
+    return Promise.resolve(answer.buildInCurrent ? projectName : '.')
+  })
+
+} else {
+  next = Promise.resolve(projectName)
+}
+
+//选择模板
+inquirer.prompt([
+{
+    type: 'input',
+    message: '请输入你的项目简介:',
+    name: 'projectDesc',
+    default: "这是我的一个新项目"
+},
+{
+    type: 'input',
+    message: '请输入你的页面title:',
+    name: 'pageTitle',
+    default: "新项目"
+},
+{
+    type: 'list',
+    message: '请选择你目前的UI设计图尺寸:',
+    name: 'uiPX',
+    choices: [
+        750,
+        720,
+        640
+    ]
+},
+{
+    type: 'list',
+    message: '请选择你所使用的构建工具:',
+    name: 'url',
+    choices: [
+        'gulp'
+    ]
+}
+]).then(answers => {
+    handleTemplate(answers)
+})
+
+//处理模板
+function handleTemplate(answers) {
+  next.then(projectName => {
+    if(projectName !== '.'){
+      fs.mkdirSync(projectName)
+      let url = tplObj[answers.url]
+      download(url, projectName)
+      .then(target => {
+        return {
+          name: projectName,
+          root: projectName,
+          downloadTemp: target
+        }
+      })
+      .then(context => {
+        return {
+          ...context,
+          metadata: {
+            ...answers,
+            projectName: context.name
+          }
+        }
+      })
+      .then(context => {
+        return generate(context.metadata, context.downloadTemp, path.parse(context.downloadTemp).dir);
+      })
+      .then(res => {
+        console.log(logSymbols.success, chalk.green('模板构建成功！\n'))
+        console.log(logSymbols.info, chalk.red('使用指南：\n'))
+        console.log('1、 cd ' + res.dest)
+        console.log('进入项目\n')
+        console.log('2、 npm i')
+        console.log('安装项目依赖\n')
+        console.log('3、 npm i gulp -g')
+        console.log('安装gulp到全局环境\n')
+        console.log('4、 gulp dev')
+        console.log('进入开发环境下的编码\n')
+        console.log('5、 gulp build')
+        console.log('打包压缩项目资源\n')
+
+      })
+      .catch(error => {
+        console.error(logSymbols.error, chalk.red(`模板构建失败：${error.message}`))
+      })
+    }
+  })
+
+}
+

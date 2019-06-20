@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+const program = require('commander')
+
+// 编写指令
+program
+  .version(require('../package').version)
+  .usage('<command> [options]')
+  .command('init', 'generate a new project')
+
+// 解析命令行参数
+program.parse(process.argv)

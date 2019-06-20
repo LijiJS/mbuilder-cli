@@ -1,0 +1,31 @@
+{
+  "name": "mbuilder-cli",
+  "version": "1.0.1",
+  "description": "一款快速生成移动端项目的脚手架工具",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "mbuilder": "bin/mbuilder",
+    "mbuilder-init": "bin/mbuilder-init"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LijiJS/mbuilder-cli.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "commander": "^2.20.0",
+    "download-git-repo": "^2.0.0",
+    "glob": "^7.1.4",
+    "handlebars": "^4.1.2",
+    "inquirer": "^6.3.1",
+    "log-symbols": "^3.0.0",
+    "metalsmith": "^2.3.0",
+    "ora": "^3.4.0",
+    "rimraf": "^2.6.3"
+  }
+}
